@@ -1,0 +1,21 @@
+#!/bin/sh -efu
+
+. /.initrd/initenv
+
+mkdir -p /tmp/bootmenu
+cd /tmp/bootmenu
+
+export NEWT_COLORS_FILE="$HOME/.newtrc"
+
+bootmenu "$rootmnt/miboot.conf" .
+
+read kernel < kernel
+read initrd < initrd
+read append < append
+
+kexec \
+	--load "$kernel" \
+	${initrd:+--initrd="$initrd"} \
+	${append:+--append="$append"}
+kexec -e
+

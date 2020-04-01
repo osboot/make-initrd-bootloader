@@ -1,0 +1,3 @@
+BOOTLOADER_DATADIR = $(FEATURESDIR)/bootloader/data
+BOOTLOADER_FILES = /sbin/kexec
+
