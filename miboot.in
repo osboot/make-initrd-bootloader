@@ -12,13 +12,14 @@ KERNEL_DIR="$MIBOOT_DIR"
 show_help()
 {
 	cat <<-EOF
-	Usage: $PROG [options] (build|install)
+	Usage: $PROG [options]
 
 	Options:
-	  -q, --quiet     try to be more quiet;
-	  -v, --verbose   print a message for each action;
-	  -V, --version   print program version and exit;
-	  -h, --help      show this text and exit.
+	  -b, --bootdir=DIR   specifies boot directory (default: /boot);
+	  -q, --quiet         try to be more quiet;
+	  -v, --verbose       print a message for each action;
+	  -V, --version       print program version and exit;
+	  -h, --help          show this text and exit.
 
 	Report bugs to authors.
 
@@ -47,15 +48,15 @@ bootloader_build_image()
 	export KERNEL_CONFIG="$KERNEL_DIR/boot/config"
 	export KERNEL_MODULES_DIR="/lib/modules/$KERNEL"
 
-	make-initrd -k "$KERNEL" -b "$KERNEL_DIR/boot" -c /etc/miboot.mk
+	make-initrd -k "$KERNEL" -b "$KERNEL_DIR/boot" -c "/etc/$PROJECT.mk"
 }
 
-bootloader_copy_image()
+bootloader_copy()
 {
-	verbose "Installing bootloader kernel and runtime image"
-
-	cp -f -- "$KERNEL_DIR/boot/vmlinuz"    "$bootdir/efi/EFI/LINUX/miboot.efi"
-	cp -f -- "$KERNEL_DIR/boot/initrd.img" "$bootdir/efi/EFI/LINUX/miboot.img"
+	! cmp -s -- "$@" ||
+		return 0
+	mkdir $verbose -p -- "$bootdir/efi/EFI/LINUX"
+	cp $verbose -f -- "$@"
 }
 
 bootloader_update_config()
@@ -64,9 +65,9 @@ bootloader_update_config()
 
 	. shell-git-config
 
-	miboot_conf=/tmp/miboot.conf
+	conf="$bootdir/$PROJECT.conf"
 
-	if [ ! -f "$miboot_conf" ]; then
+	if [ ! -f "$conf" ]; then
 		root="$(findmnt -n -o UUID -T "$bootdir")"
 
 		{
@@ -74,7 +75,7 @@ bootloader_update_config()
 			printf '\t%s\n' \
 				"timeout = 10" \
 				"cmdline = ro root=UUID=$root"
-		} > "$miboot_conf"
+		} > "$conf"
 	fi
 
 	labels=' '
@@ -98,7 +99,7 @@ bootloader_update_config()
 			label="${label:-Default}"
 
 			if [ -z "${labels##* \"$label\" *}" ]; then
-				printf >&2 'skip %s\n' "$label"
+				verbose "Skip $label"
 				continue
 			fi
 
@@ -124,14 +125,14 @@ bootloader_update_config()
 		done
 	}
 
-	git_config_env "$miboot_conf"
+	git_config_env "$conf"
 	git_config_get_subsections 'boot'
 
 	{
 		print_entry "$bootdir"/vmlinuz
 		print_entry "$bootdir"/vmlinuz-[A-Za-z]*
 		print_entry "$bootdir"/vmlinuz-[0-9]*
-	} >> "$miboot_conf"
+	} >> "$conf"
 }
 
 TEMP=`getopt -n "$PROG" -o "b:,$getopt_common_opts" -l "boot:,$getopt_common_longopts" -- "$@"` ||
@@ -159,10 +160,9 @@ while :; do
 	shift
 done
 
-[ ! -f "$KERNEL_DIR/boot/initrd.img" ] ||
-	bootloader_build_image
+bootloader_build_image
 
-[ ! -f "$bootdir/efi/EFI/LINUX/miboot.img" ] ||
-	bootloader_copy_image
+bootloader_copy "$KERNEL_DIR/boot/vmlinuz"    "$bootdir/efi/EFI/LINUX/$PROJECT.efi"
+bootloader_copy "$KERNEL_DIR/boot/miboot.img" "$bootdir/efi/EFI/LINUX/$PROJECT.img"
 
 bootloader_update_config

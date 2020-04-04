@@ -1,6 +1,5 @@
 #!/bin/sh -efu
 
 cd /lib/poll/scripts
-. ./live-mode
 . ./console-inactive
 . ./boot-config
