@@ -5,7 +5,7 @@
 
 prefix=
 conf=
-n='miboot.conf'
+n='bootloader.conf'
 
 for d in '' '/boot'; do
 	if [ -e "$rootmnt$d/$n" ]; then

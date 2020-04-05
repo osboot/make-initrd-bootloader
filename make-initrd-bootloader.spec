@@ -29,9 +29,9 @@ Make-initrd bootloader feature.
 %install
 %makeinstall_std
 
-kver="`cat "%buildroot/lib/miboot/boot/version"`"
-mv -f -- "%buildroot/lib/miboot/boot/System.map" "%buildroot/lib/miboot/boot/System.map-$kver"
-mv -f -- "%buildroot/lib/miboot/boot/config"     "%buildroot/lib/miboot/boot/config-$kver"
+kver="`cat "%buildroot/lib/bootloader/boot/version"`"
+mv -f -- "%buildroot/lib/bootloader/boot/System.map" "%buildroot/lib/bootloader/boot/System.map-$kver"
+mv -f -- "%buildroot/lib/bootloader/boot/config"     "%buildroot/lib/bootloader/boot/config-$kver"
 
 mkdir -p %buildroot/%_datadir/make-initrd/features
 cp -a feature %buildroot/%_datadir/make-initrd/features/bootloader
@@ -44,22 +44,22 @@ rm -f -- "$modules_dir"/source
 
 rm -f -- "$modules_dir"/modules.{alias,dep,symbols,builtin}.bin
 touch -- "$modules_dir"/modules.{alias,dep,symbols,builtin}.bin
-touch %buildroot/lib/miboot/boot/miboot.img
+touch %buildroot/lib/bootloader/boot/bootloader.img
 
 %add_findreq_skiplist /usr/share/make-initrd/features/*
-%add_verify_elf_skiplist /lib/miboot/boot/vmlinuz-*
-%brp_strip_none /lib/miboot/boot/*
+%add_verify_elf_skiplist /lib/bootloader/boot/vmlinuz-*
+%brp_strip_none /lib/bootloader/boot/*
 
 %files
-/sbin/miboot
-/lib/miboot
-%ghost /lib/miboot/boot/miboot.img
+/sbin/make-bootloader
+/lib/bootloader
+%ghost /lib/bootloader/boot/bootloader.img
 /lib/modules/*
 %ghost /lib/modules/*/modules.alias.bin
 %ghost /lib/modules/*/modules.dep.bin
 %ghost /lib/modules/*/modules.symbols.bin
 %ghost /lib/modules/*/modules.builtin.bin
-%config(noreplace) %_sysconfdir/miboot.mk
+%config(noreplace) %_sysconfdir/bootloader.mk
 %_datadir/make-initrd/features/bootloader
 
 %changelog

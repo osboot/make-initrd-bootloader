@@ -3,9 +3,8 @@
 . shell-error
 . shell-args
 
-PROJECT=miboot
+PROJECT=bootloader
 
-TARGET="/var/lib/$PROJECT"
 MIBOOT_DIR="/lib/$PROJECT"
 KERNEL_DIR="$MIBOOT_DIR"
 
@@ -162,7 +161,7 @@ done
 
 bootloader_build_image
 
-bootloader_copy "$KERNEL_DIR/boot/vmlinuz"    "$bootdir/efi/EFI/LINUX/$PROJECT.efi"
-bootloader_copy "$KERNEL_DIR/boot/miboot.img" "$bootdir/efi/EFI/LINUX/$PROJECT.img"
+bootloader_copy "$KERNEL_DIR/boot/vmlinuz"        "$bootdir/efi/EFI/LINUX/$PROJECT.efi"
+bootloader_copy "$KERNEL_DIR/boot/bootloader.img" "$bootdir/efi/EFI/LINUX/$PROJECT.img"
 
 bootloader_update_config

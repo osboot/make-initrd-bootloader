@@ -1,4 +1,4 @@
-PROJECT = miboot
+PROJECT = bootloader
 VERSION = 1.0.0
 
 BACKEND = ncurses
@@ -6,7 +6,7 @@ BACKEND = ncurses
 MENU_PROG = bootmenu
 CFLAGS    = -Os -Wall -Wextra
 
-basedir     = /lib/miboot
+basedir     = /lib/$(PROJECT)
 sbindir    ?= /sbin
 sysconfdir ?= /etc
 
@@ -38,27 +38,27 @@ ncurses_SRCS   = bootmenu.c
 ncurses_LIBS   = -lnewt -lslang -liniparser
 ncurses_OBJS   = $(ncurses_SRCS:.c=.o)
 
-all: miboot $(MENU_PROG) build-kernel
+all: make-bootloader $(MENU_PROG) build-kernel
 
 INSTALL_TARGETS = \
 	install-bin \
 	install-menu \
 	install-kernel \
-	install-miboot-config
+	install-config
 
 install: $(INSTALL_TARGETS)
 
-install-bin: $(PROJECT)
+install-bin: make-bootloader
 	$(MKDIR_P) -- $(DESTDIR)/$(sbindir)
-	$(INSTALL) -m755 $(PROJECT) $(DESTDIR)/$(sbindir)/$(PROJECT)
+	$(INSTALL) -m755 make-bootloader $(DESTDIR)/$(sbindir)/make-bootloader
 
 install-menu: $(MENU_PROG)
 	$(MKDIR_P) -- $(DESTDIR)/$(basedir)/bin
 	$(INSTALL) -m755 $(MENU_PROG) $(DESTDIR)/$(basedir)/bin/bootmenu
 
-install-miboot-config:
+install-config:
 	$(MKDIR_P) -- $(DESTDIR)/$(sysconfdir)
-	$(CP) -f -- initrd-miboot.mk $(DESTDIR)/$(sysconfdir)/$(PROJECT).mk
+	$(CP) -f -- initrd-bootloader.mk $(DESTDIR)/$(sysconfdir)/$(PROJECT).mk
 
 install-kernel: linux build-kernel
 	$(MKDIR_P) -- $(DESTDIR)/$(basedir)/boot
