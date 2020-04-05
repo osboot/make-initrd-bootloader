@@ -121,7 +121,7 @@ iface_list(int *iface)
 
 	create_winform(&w);
 
-	newtFormAddHotKey(w.form, NEWT_KEY_F2);
+	newtFormAddHotKey(w.form, NEWT_KEY_ESCAPE);
 	newtFormAddHotKey(w.form, NEWT_KEY_ENTER);
 	newtLabelSetText(w.labelHint2, "Press any to interupt automatic boot");
 
@@ -166,21 +166,20 @@ iface_list(int *iface)
 
 		if (!input_pending) {
 			*iface = INTERFACE_DONE;
-			newtFormDestroy(w.form);
-			return;
+			goto set;
 		}
 		timeout = 0;
 	}
 
 	newtLabelSetText(labelTimeout, "");
 	newtLabelSetText(w.labelHint1, "Press Enter to boot selected entry");
-	newtLabelSetText(w.labelHint2, "Press F2 to edit boot entry");
+	newtLabelSetText(w.labelHint2, "Press Escape to edit boot entry");
 
 	run_winform(&w);
 
 	if (w.es.reason == NEWT_EXIT_HOTKEY) {
 		switch (w.es.u.key) {
-			case NEWT_KEY_F2:
+			case NEWT_KEY_ESCAPE:
 				*iface = INTERFACE_EDIT;
 				break;
 			case NEWT_KEY_ENTER:
@@ -190,6 +189,7 @@ iface_list(int *iface)
 				break;
 		}
 	}
+set:
 	if (newtListboxItemCount(listbox))
 		current_boot = newtListboxGetCurrent(listbox);
 end:
