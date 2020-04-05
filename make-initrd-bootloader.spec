@@ -1,5 +1,5 @@
 Name: make-initrd-bootloader
-Version: 0.2
+Version: 0.3
 Release: alt1
 
 Summary: Bootloader feature for make-initrd
@@ -46,6 +46,9 @@ rm -f -- "$modules_dir"/modules.{alias,dep,symbols,builtin}.bin
 touch -- "$modules_dir"/modules.{alias,dep,symbols,builtin}.bin
 touch %buildroot/lib/bootloader/boot/bootloader.img
 
+mkdir -p -- %buildroot/boot
+touch %buildroot/boot/bootloader.conf
+
 %add_findreq_skiplist /usr/share/make-initrd/features/*
 %add_verify_elf_skiplist /lib/bootloader/boot/vmlinuz-*
 %brp_strip_none /lib/bootloader/boot/*
@@ -59,10 +62,14 @@ touch %buildroot/lib/bootloader/boot/bootloader.img
 %ghost /lib/modules/*/modules.dep.bin
 %ghost /lib/modules/*/modules.symbols.bin
 %ghost /lib/modules/*/modules.builtin.bin
+%ghost %config(noreplace) /boot/bootloader.conf
 %config(noreplace) %_sysconfdir/bootloader.mk
 %_datadir/make-initrd/features/bootloader
 
 %changelog
+* Sun Apr 05 2020 Alexey Gladkov <legion@altlinux.ru> 0.3-alt1
+- Rename loader.
+
 * Sat Apr 04 2020 Alexey Gladkov <legion@altlinux.ru> 0.2-alt1
 - Update files.
 
