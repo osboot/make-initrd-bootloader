@@ -1,10 +1,12 @@
 Name: make-initrd-bootloader
-Version: 0.3
+Version: 0.4
 Release: alt1
 
 Summary: Bootloader feature for make-initrd
 License: GPL-2
 Group: System/Base
+
+ExclusiveArch: x86_64
 
 Source0: %name-%version.tar
 
@@ -30,8 +32,16 @@ Make-initrd bootloader feature.
 %makeinstall_std
 
 kver="`cat "%buildroot/lib/bootloader/boot/version"`"
-mv -f -- "%buildroot/lib/bootloader/boot/System.map" "%buildroot/lib/bootloader/boot/System.map-$kver"
-mv -f -- "%buildroot/lib/bootloader/boot/config"     "%buildroot/lib/bootloader/boot/config-$kver"
+
+[ -e "%buildroot/lib/bootloader/boot/System.map-$kver" ] ||
+	mv -f -- \
+		"%buildroot/lib/bootloader/boot/System.map" \
+		"%buildroot/lib/bootloader/boot/System.map-$kver"
+
+[ -e "%buildroot/lib/bootloader/boot/config-$kver" ] ||
+	mv -f -- \
+		"%buildroot/lib/bootloader/boot/config" \
+		"%buildroot/lib/bootloader/boot/config-$kver"
 
 mkdir -p %buildroot/%_datadir/make-initrd/features
 cp -a feature %buildroot/%_datadir/make-initrd/features/bootloader
@@ -67,6 +77,9 @@ touch %buildroot/boot/bootloader.conf
 %_datadir/make-initrd/features/bootloader
 
 %changelog
+* Thu Apr 09 2020 Alexey Gladkov <legion@altlinux.ru> 0.4-alt1
+- Built package only for x86_64.
+
 * Sun Apr 05 2020 Alexey Gladkov <legion@altlinux.ru> 0.3-alt1
 - Rename loader.
 
