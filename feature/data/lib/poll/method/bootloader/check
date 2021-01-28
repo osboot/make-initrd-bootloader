@@ -1,5 +1,0 @@
-#!/bin/sh -efu
-
-cd /lib/poll/scripts
-. ./console-inactive
-. ./boot-config
