@@ -5,9 +5,6 @@
 
 PROJECT=bootloader
 
-MIBOOT_DIR="/lib/$PROJECT"
-KERNEL_DIR="$MIBOOT_DIR"
-
 show_help()
 {
 	cat <<-EOF
@@ -39,24 +36,6 @@ print_version()
 	exit
 }
 
-bootloader_build_image()
-{
-	verbose "Building bootloader runtime image"
-
-	export KERNEL="$(cat "$KERNEL_DIR/boot/version")"
-	export KERNEL_CONFIG="$KERNEL_DIR/boot/config"
-	export KERNEL_MODULES_DIR="/lib/modules/$KERNEL"
-
-	make-initrd -k "$KERNEL" -b "$KERNEL_DIR/boot" -c "/etc/$PROJECT.mk"
-}
-
-bootloader_copy()
-{
-	! cmp -s -- "$@" ||
-		return 0
-	mkdir $verbose -p -- "$bootdir/efi/EFI/LINUX"
-	cp $verbose -f -- "$@"
-}
 
 bootloader_update_config()
 {
@@ -104,9 +83,9 @@ bootloader_update_config()
 
 			initrd=
 			for initrd_name in initrd initramfs; do
-				for suf in '' '.img'; do
-					if [ -f "$bootdir/$initrd_name${kver:+-$kver}$suf" ]; then
-						initrd="$bootdir/$initrd_name${kver:+-$kver}$suf"
+				for suf in "${kver:+-$kver}" "${kver:+-$kver}.img" ".img${kver:+-$kver}"; do
+					if [ -f "$bootdir/$initrd_name$suf" ]; then
+						initrd="$bootdir/$initrd_name$suf"
 						break 2
 					fi
 				done
@@ -158,10 +137,5 @@ while :; do
 	esac
 	shift
 done
-
-bootloader_build_image
-
-bootloader_copy "$KERNEL_DIR/boot/vmlinuz"        "$bootdir/efi/EFI/LINUX/$PROJECT.efi"
-bootloader_copy "$KERNEL_DIR/boot/bootloader.img" "$bootdir/efi/EFI/LINUX/$PROJECT.img"
 
 bootloader_update_config

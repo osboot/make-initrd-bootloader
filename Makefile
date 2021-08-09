@@ -3,7 +3,6 @@ VERSION = 1.0.0
 
 BACKEND = ncurses
 
-MENU_PROG = bootmenu
 CFLAGS    = -Os -Wall -Wextra
 
 basedir     = /lib/$(PROJECT)
@@ -22,6 +21,7 @@ quiet_cmd = \
 	$(if $(VERBOSE),$(3),$(Q)printf "  %-08s%s\n" "$(1)" $(2); $(3))
 
 CP       = $(Q)cp -a
+MV       = $(Q)mv
 RM       = $(Q)rm -f
 CHMOD    = $(Q)chmod
 INSTALL  = $(Q)install
@@ -34,27 +34,19 @@ HELP2MAN = $(call quiet_cmd,MAN,$@,env -i help2man -N)
 COMPILE  = $(call quiet_cmd,CC,$<,$(COMPILE.c))
 LINK     = $(call quiet_cmd,CCLD,$@,$(LINK.o))
 
-ncurses_SRCS   = bootmenu.c
-ncurses_LIBS   = -lnewt -lslang -liniparser
-ncurses_OBJS   = $(ncurses_SRCS:.c=.o)
-
-all: make-bootloader $(MENU_PROG) build-kernel
+all: make-bootloader build-kernel
 
 INSTALL_TARGETS = \
 	install-bin \
-	install-menu \
 	install-kernel \
 	install-config
 
 install: $(INSTALL_TARGETS)
 
-install-bin: make-bootloader
+install-bin: make-bootloader-image make-bootloader-config
 	$(MKDIR_P) -- $(DESTDIR)/$(sbindir)
-	$(INSTALL) -m755 make-bootloader $(DESTDIR)/$(sbindir)/make-bootloader
-
-install-menu: $(MENU_PROG)
-	$(MKDIR_P) -- $(DESTDIR)/$(basedir)/bin
-	$(INSTALL) -m755 $(MENU_PROG) $(DESTDIR)/$(basedir)/bin/bootmenu
+	$(INSTALL) -m755 make-bootloader-image $(DESTDIR)/$(sbindir)/make-bootloader-image
+	$(INSTALL) -m755 make-bootloader-config $(DESTDIR)/$(sbindir)/make-bootloader-config
 
 install-config:
 	$(MKDIR_P) -- $(DESTDIR)/$(sysconfdir)
@@ -70,6 +62,9 @@ install-kernel: linux build-kernel
 		install modules_install
 	$(MAKE) -C linux -s kernelversion > "$(DESTDIR)/$(basedir)/boot/version"
 	$(CP) -f -- linux/.config "$(DESTDIR)/$(basedir)/boot/config"
+	$(eval KERNEL_VERSION := $(shell make -C linux -s kernelversion))
+	$(MV) -f -- "$(DESTDIR)/$(basedir)/boot/System.map" "$(DESTDIR)/$(basedir)/boot/System.map-$(KERNEL_VERSION)"
+	$(MV) -f -- "$(DESTDIR)/$(basedir)/boot/config" "$(DESTDIR)/$(basedir)/boot/config-$(KERNEL_VERSION)"
 
 clean:
 	$(RM) -- $(PROJECT) $(MENU_PROG)
