@@ -48,7 +48,7 @@ install-bin: make-bootloader-image make-bootloader-config
 	$(INSTALL) -m755 make-bootloader-image $(DESTDIR)/$(sbindir)/make-bootloader-image
 	$(INSTALL) -m755 make-bootloader-config $(DESTDIR)/$(sbindir)/make-bootloader-config
 
-install-config:
+install-config: initrd-bootloader.mk
 	$(MKDIR_P) -- $(DESTDIR)/$(sysconfdir)
 	$(CP) -f -- initrd-bootloader.mk $(DESTDIR)/$(sysconfdir)/$(PROJECT).mk
 
