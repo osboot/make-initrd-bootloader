@@ -12,6 +12,8 @@ show_help()
 
 	Options:
 	  -b, --bootdir=DIR   specifies boot directory (default: /boot);
+	  -t, --timeout=NUM   timeout for showing boot menu
+	  -n  --new           rewrite bootloader.conf file
 	  -q, --quiet         try to be more quiet;
 	  -v, --verbose       print a message for each action;
 	  -V, --version       print program version and exit;
@@ -45,13 +47,15 @@ bootloader_update_config()
 
 	conf="$bootdir/$PROJECT.conf"
 
+	[ -n "${new-}" ] && rm -rf "$conf"
+
 	if [ ! -f "$conf" ]; then
 		root="$(findmnt -n -o UUID -T "$bootdir")"
 
 		{
 			printf '[global]\n'
 			printf '\t%s\n' \
-				"timeout = 10" \
+				"timeout = $timeout" \
 				"cmdline = ro root=UUID=$root"
 		} > "$conf"
 	fi
@@ -113,16 +117,22 @@ bootloader_update_config()
 	} >> "$conf"
 }
 
-TEMP=`getopt -n "$PROG" -o "b:,$getopt_common_opts" -l "boot:,$getopt_common_longopts" -- "$@"` ||
+TEMP=`getopt -n "$PROG" -o "b:,t:,n,$getopt_common_opts" -l "boot:,timeout:,new,$getopt_common_longopts" -- "$@"` ||
 	show_usage
 eval set -- "$TEMP"
 
 bootdir=/boot
+timeout=10
 
 while :; do
 	case "$1" in
 		-b|--boot-dir)
 			bootdir="$(opt_check_dir "$1" "$2")"
+			;;
+		-t|--timeout)
+			timeout="$(opt_check_number "$1" "$2")"
+			;;
+		-n|--new) new=-n
 			;;
 		-h|--help) show_help
 			;;
