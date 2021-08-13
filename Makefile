@@ -1,11 +1,6 @@
 PROJECT = bootloader
 VERSION = 1.0.0
 
-BACKEND = ncurses
-
-MENU_PROG = bootmenu
-CFLAGS    = -Os -Wall -Wextra
-
 basedir     = /lib/$(PROJECT)
 sbindir    ?= /sbin
 sysconfdir ?= /etc
@@ -30,19 +25,11 @@ TOUCH_R  = $(Q)touch -r
 STRIP    = $(Q)strip -s
 MAKE     = $(Q)make
 SED      = $(call quiet_cmd,SED,$@,sed)
-HELP2MAN = $(call quiet_cmd,MAN,$@,env -i help2man -N)
-COMPILE  = $(call quiet_cmd,CC,$<,$(COMPILE.c))
-LINK     = $(call quiet_cmd,CCLD,$@,$(LINK.o))
 
-ncurses_SRCS   = bootmenu.c
-ncurses_LIBS   = -lnewt -lslang -liniparser
-ncurses_OBJS   = $(ncurses_SRCS:.c=.o)
-
-all: make-bootloader $(MENU_PROG) build-kernel
+all: make-bootloader build-kernel
 
 INSTALL_TARGETS = \
 	install-bin \
-	install-menu \
 	install-kernel \
 	install-config
 
@@ -51,10 +38,6 @@ install: $(INSTALL_TARGETS)
 install-bin: make-bootloader
 	$(MKDIR_P) -- $(DESTDIR)/$(sbindir)
 	$(INSTALL) -m755 make-bootloader $(DESTDIR)/$(sbindir)/make-bootloader
-
-install-menu: $(MENU_PROG)
-	$(MKDIR_P) -- $(DESTDIR)/$(basedir)/bin
-	$(INSTALL) -m755 $(MENU_PROG) $(DESTDIR)/$(basedir)/bin/bootmenu
 
 install-config:
 	$(MKDIR_P) -- $(DESTDIR)/$(sysconfdir)
@@ -78,9 +61,6 @@ build-kernel: linux
 	$(CP) -f -- kernel.config linux/.config
 	$(MAKE) -C linux
 
-$(MENU_PROG): $($(BACKEND)_OBJS)
-	$(LINK) $^ $($(BACKEND)_LIBS) -o $@
-
 %: %.in
 	$(SED) \
 		-e 's,@PROJECT@,$(PROJECT),g' \
@@ -88,7 +68,3 @@ $(MENU_PROG): $($(BACKEND)_OBJS)
 		<$< >$@
 	$(TOUCH_R) $< $@
 	$(CHMOD) --reference=$< $@
-
-%.o: %.c
-	$(COMPILE) $(OUTPUT_OPTION) $<
-
