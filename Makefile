@@ -34,7 +34,7 @@ HELP2MAN = $(call quiet_cmd,MAN,$@,env -i help2man -N)
 COMPILE  = $(call quiet_cmd,CC,$<,$(COMPILE.c))
 LINK     = $(call quiet_cmd,CCLD,$@,$(LINK.o))
 
-all: make-bootloader build-kernel
+all: make-bootloader-image make-bootloader-config build-kernel
 
 INSTALL_TARGETS = \
 	install-bin \
