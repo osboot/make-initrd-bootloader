@@ -94,6 +94,9 @@ bootloader_update_config()
 			kver="${kernel##*/vmlinuz}"
 			kver="${kver#-}"
 
+			kernel=${kernel#${bootdir}}
+			kernel=${kernel#/}
+
 			label="${kver:+Kernel ($kver)}"
 			label="${label:-Default}"
 
@@ -106,7 +109,12 @@ bootloader_update_config()
 			for initrd_name in initrd initramfs; do
 				for suf in '' '.img'; do
 					if [ -f "$bootdir/$initrd_name${kver:+-$kver}$suf" ]; then
-						initrd="$bootdir/$initrd_name${kver:+-$kver}$suf"
+						initrd="$initrd_name${kver:+-$kver}$suf"
+						break 2
+					fi
+
+					if [ -f "$bootdir/$initrd_name$suf${kver:+-$kver}" ]; then
+						initrd=$initrd_name$suf${kver:+-$kver}
 						break 2
 					fi
 				done
