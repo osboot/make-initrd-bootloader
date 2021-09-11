@@ -1,8 +1,8 @@
 Name: make-initrd-bootloader
-Version: 0.4
+Version: 0.5
 Release: alt1
 
-Summary: Bootloader feature for make-initrd
+Summary: Bootloader based on make-initrd
 License: GPL-2
 Group: System/Base
 
@@ -15,11 +15,10 @@ BuildRequires: libssl-devel
 BuildRequires: libelf-devel
 BuildRequires: kmod
 
-Requires: make-initrd
-Requires: kexec-tools
+Requires: make-initrd-boot
 
 %description
-Make-initrd bootloader feature.
+%summary.
 
 %prep
 %setup
@@ -69,6 +68,9 @@ touch %buildroot/boot/bootloader.conf
 %config(noreplace) %_sysconfdir/bootloader.mk
 
 %changelog
+* Sat Sep 11 2021 Alexey Gladkov <legion@altlinux.ru> 0.5-alt1
+- Move feature to make-initrd package.
+
 * Thu Apr 09 2020 Alexey Gladkov <legion@altlinux.ru> 0.4-alt1
 - Built package only for x86_64.
 
